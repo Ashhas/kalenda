@@ -8,7 +8,7 @@ android {
     namespace = "nl.kabisa.kalenda.widget"
     compileSdk = 35
     defaultConfig {
-        applicationId = "nl.kabisa.kalenda"
+        applicationId = "nl.kabisa.kalenda.widget"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
