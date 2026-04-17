@@ -1,0 +1,13 @@
+.gradle/
+.idea/
+*.iml
+build/
+local.properties
+*.class
+*.log
+*.swp
+.DS_Store
+/captures
+/profiling
+*.jks
+*.keystore
