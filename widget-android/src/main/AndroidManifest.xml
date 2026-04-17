@@ -4,8 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="Kalenda"
-        android:theme="@style/Theme.AppCompat.DayNight">
+        android:label="Kalenda">
 
         <receiver
             android:name=".widget.KalendaWidgetReceiver"

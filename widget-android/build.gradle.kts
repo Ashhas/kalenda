@@ -19,6 +19,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
@@ -27,4 +30,5 @@ dependencies {
     implementation(libs.androidx.glance.material3)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.datetime)
 }
