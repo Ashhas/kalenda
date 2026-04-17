@@ -40,4 +40,15 @@ class SortEventsUseCaseTest {
         assertEquals("timed", sorted[0].id)
         assertEquals("allday", sorted[1].id)
     }
+
+    @Test
+    fun `all day events removed when AllDayPosition is HIDDEN`() {
+        val events = listOf(
+            event("timed", "2026-04-17T09:00:00Z", allDay = false),
+            event("allday", "2026-04-17T00:00:00Z", allDay = true)
+        )
+        val sorted = useCase(events, AllDayPosition.HIDDEN)
+        assertEquals(1, sorted.size)
+        assertEquals("timed", sorted[0].id)
+    }
 }

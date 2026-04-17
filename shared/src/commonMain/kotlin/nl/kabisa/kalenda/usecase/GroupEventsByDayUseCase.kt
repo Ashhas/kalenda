@@ -1,6 +1,5 @@
 package nl.kabisa.kalenda.usecase
 
-import nl.kabisa.kalenda.domain.AllDayPosition
 import nl.kabisa.kalenda.domain.CalendarEvent
 import nl.kabisa.kalenda.domain.DayGroup
 import nl.kabisa.kalenda.domain.WidgetSettings
@@ -27,7 +26,11 @@ class GroupEventsByDayUseCase {
 
         val grouped = mutableMapOf<LocalDate, MutableList<CalendarEvent>>()
         for (event in events) {
-            val eventDate = event.startTime.toLocalDateTime(deviceTimezone).date
+            val eventDate = if (event.isAllDay) {
+                event.startTime.toLocalDateTime(event.timezone).date
+            } else {
+                event.startTime.toLocalDateTime(deviceTimezone).date
+            }
             if (eventDate >= today && eventDate < endDate) {
                 grouped.getOrPut(eventDate) { mutableListOf() }.add(event)
             }
@@ -36,12 +39,7 @@ class GroupEventsByDayUseCase {
         return grouped.entries
             .sortedBy { it.key }
             .map { (date, dayEvents) ->
-                val filtered = if (settings.allDayPosition == AllDayPosition.HIDDEN) {
-                    dayEvents.filter { !it.isAllDay }
-                } else {
-                    dayEvents
-                }
-                val sorted = sortUseCase(filtered, settings.allDayPosition)
+                val sorted = sortUseCase(dayEvents, settings.allDayPosition)
                 val label = when (date) {
                     today -> "Today"
                     tomorrow -> "Tomorrow"

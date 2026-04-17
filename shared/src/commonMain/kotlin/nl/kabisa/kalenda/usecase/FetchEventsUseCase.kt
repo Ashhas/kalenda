@@ -11,7 +11,8 @@ class FetchEventsUseCase(
     suspend operator fun invoke(): List<CalendarEvent> {
         val settings = settingsRepository.getSettings()
         val allEvents = settings.accounts.flatMap { account ->
-            calendarRepository.fetchEvents(account, settings.scrollDays)
+            runCatching { calendarRepository.fetchEvents(account, settings.scrollDays) }
+                .getOrElse { emptyList() }
         }
         calendarRepository.updateCache(allEvents)
         return allEvents
