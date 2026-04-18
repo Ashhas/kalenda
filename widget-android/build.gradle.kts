@@ -1,18 +1,14 @@
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeCompiler)
 }
 
 android {
-    namespace = "nl.kabisa.kalenda.widget"
+    namespace = "nl.ashhasstudio.kalenda.widget"
     compileSdk = 35
     defaultConfig {
-        applicationId = "nl.kabisa.kalenda.widget"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
     }
     buildFeatures { compose = true }
     compileOptions {

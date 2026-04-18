@@ -22,14 +22,15 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
+            api(libs.ktor.client.core)
+            api(libs.ktor.client.content.negotiation)
+            api(libs.ktor.serialization.kotlinx.json)
             implementation(libs.datastore.preferences.core)
         }
         androidMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
+            api(libs.ktor.client.okhttp)
             implementation(libs.datastore.preferences)
+            implementation(libs.androidx.security.crypto)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -41,7 +42,7 @@ kotlin {
 }
 
 android {
-    namespace = "nl.kabisa.kalenda.shared"
+    namespace = "nl.ashhasstudio.kalenda.shared"
     compileSdk = 35
     defaultConfig { minSdk = 26 }
     compileOptions {

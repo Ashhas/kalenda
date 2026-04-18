@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
@@ -5,6 +7,12 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
 }
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) load(file.inputStream())
+}
+val oauthClientId: String = localProperties.getProperty("GOOGLE_OAUTH_CLIENT_ID", "")
 
 kotlin {
     androidTarget {
@@ -30,25 +38,35 @@ kotlin {
             implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
+            implementation(project(":widget-android"))
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.androidx.glance.appwidget)
+            implementation(libs.androidx.glance.material3)
+            implementation(libs.androidx.work.runtime.ktx)
+            implementation("androidx.browser:browser:1.8.0")
         }
     }
 }
 
 android {
-    namespace = "nl.kabisa.kalenda.configurator"
+    namespace = "nl.ashhasstudio.kalenda.configurator"
     compileSdk = 35
     defaultConfig {
-        applicationId = "nl.kabisa.kalenda.configurator"
+        applicationId = "nl.ashhasstudio.kalenda"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"$oauthClientId\"")
+        val reverseClientId = oauthClientId.split(".").reversed().joinToString(".")
+        manifestPlaceholders["oauthRedirectScheme"] = reverseClientId
     }
+    buildFeatures { buildConfig = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
