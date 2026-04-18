@@ -78,6 +78,9 @@ private fun ScrollableContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZon
                     DayHeader(dayGroup)
                 }
             }
+            if (dayGroup.label == "Today" && dayGroup.events.isEmpty()) {
+                item { EmptyTodayHint() }
+            }
             items(dayGroup.events) { event ->
                 EventRowItem(event = event, deviceTimezone = deviceTimezone)
             }
@@ -102,14 +105,40 @@ private fun CompactContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) 
         } else {
             DayHeader(firstGroup)
         }
-        firstGroup.events.take(3).forEach { event ->
-            EventRowItem(event = event, deviceTimezone = deviceTimezone)
-        }
-        if (firstGroup.events.size > 3 || firstGroup.hasMore) {
-            val remaining = (firstGroup.events.size - 3).coerceAtLeast(0) + firstGroup.moreCount
-            if (remaining > 0) {
-                OverflowItem(moreCount = remaining)
+        if (firstGroup.events.isEmpty()) {
+            if (firstGroup.label == "Today") EmptyTodayHint()
+            val nextGroup = dayGroups.getOrNull(1)
+            if (nextGroup != null) {
+                DayHeader(nextGroup)
+                nextGroup.events.take(3).forEach { event ->
+                    EventRowItem(event = event, deviceTimezone = deviceTimezone)
+                }
+                if (nextGroup.events.size > 3 || nextGroup.hasMore) {
+                    val remaining = (nextGroup.events.size - 3).coerceAtLeast(0) + nextGroup.moreCount
+                    if (remaining > 0) OverflowItem(moreCount = remaining)
+                }
+            }
+        } else {
+            firstGroup.events.take(3).forEach { event ->
+                EventRowItem(event = event, deviceTimezone = deviceTimezone)
+            }
+            if (firstGroup.events.size > 3 || firstGroup.hasMore) {
+                val remaining = (firstGroup.events.size - 3).coerceAtLeast(0) + firstGroup.moreCount
+                if (remaining > 0) OverflowItem(moreCount = remaining)
             }
         }
     }
+}
+
+@Composable
+private fun EmptyTodayHint() {
+    Text(
+        text = "No events today",
+        style = TextStyle(
+            color = MutedWhite,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Normal,
+        ),
+        modifier = GlanceModifier.padding(start = 17.dp, end = 17.dp, top = 2.dp, bottom = 6.dp),
+    )
 }

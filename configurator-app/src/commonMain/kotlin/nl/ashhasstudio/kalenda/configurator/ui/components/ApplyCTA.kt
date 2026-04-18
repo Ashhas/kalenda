@@ -45,7 +45,6 @@ fun ApplyCTA(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 72.dp)
             .scale(scale)
             .graphicsLayer { this.alpha = alpha }
             .clip(RoundedCornerShape(14.dp))

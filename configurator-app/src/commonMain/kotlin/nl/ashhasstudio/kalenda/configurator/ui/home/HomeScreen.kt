@@ -74,50 +74,57 @@ fun HomeScreen(
             .fillMaxSize()
             .background(colors.background)
             .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(vertical = 12.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-            HomeHero(
-                dayOfWeek = dayOfWeek,
-                dateLabel = dateLabel,
-                accentColor = accent,
-            )
-            SectionLabel(text = "Preview")
-        }
-
-        PreviewStage {
-            WidgetPreviewCard(dayGroups = dayGroups, deviceTimezone = deviceTz)
-        }
-
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-            SectionLabel(text = "Configure")
-            WidgetCard {
-                NavRow(
-                    icon = "layout",
-                    tint = accent,
-                    title = "Layout",
-                    meta = layoutSummary,
-                    onClick = onNavigateToLayout,
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(top = 12.dp, bottom = 24.dp)
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                HomeHero(
+                    dayOfWeek = dayOfWeek,
+                    dateLabel = dateLabel,
+                    accentColor = accent,
                 )
-                WidgetDivider(startPadding = 60)
-                NavRow(
-                    icon = "appearance",
-                    tint = CalColors.lavender,
-                    title = "Appearance",
-                    meta = appearanceSummary,
-                    onClick = onNavigateToAppearance,
-                )
-                WidgetDivider(startPadding = 60)
-                NavRow(
-                    icon = "calendars",
-                    tint = CalColors.basil,
-                    title = "Calendars",
-                    meta = calendarsSummary,
-                    onClick = onNavigateToCalendars,
-                )
+                SectionLabel(text = "Preview")
             }
 
+            PreviewStage {
+                WidgetPreviewCard(dayGroups = dayGroups, deviceTimezone = deviceTz)
+            }
+
+            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+                SectionLabel(text = "Configure")
+                WidgetCard {
+                    NavRow(
+                        icon = "layout",
+                        tint = accent,
+                        title = "Layout",
+                        meta = layoutSummary,
+                        onClick = onNavigateToLayout,
+                    )
+                    WidgetDivider(startPadding = 60)
+                    NavRow(
+                        icon = "appearance",
+                        tint = CalColors.lavender,
+                        title = "Appearance",
+                        meta = appearanceSummary,
+                        onClick = onNavigateToAppearance,
+                    )
+                    WidgetDivider(startPadding = 60)
+                    NavRow(
+                        icon = "calendars",
+                        tint = CalColors.basil,
+                        title = "Calendars",
+                        meta = calendarsSummary,
+                        onClick = onNavigateToCalendars,
+                    )
+                }
+            }
+        }
+
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
             ApplyCTA(accent = accent, onClick = onApplyToWidget)
         }
     }

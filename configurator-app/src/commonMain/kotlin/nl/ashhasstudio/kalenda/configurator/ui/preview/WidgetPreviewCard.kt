@@ -57,6 +57,14 @@ fun WidgetPreviewCard(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) {
                         modifier = Modifier.padding(start = 17.dp, top = 14.dp, bottom = 4.dp)
                     )
                 }
+                if (index == 0 && group.events.isEmpty()) {
+                    Text(
+                        "No events today",
+                        color = colors.textSubtle,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 17.dp, top = 2.dp, bottom = 6.dp)
+                    )
+                }
                 group.events.forEach { event ->
                     PillEventRow(event = event, timezone = deviceTimezone)
                 }

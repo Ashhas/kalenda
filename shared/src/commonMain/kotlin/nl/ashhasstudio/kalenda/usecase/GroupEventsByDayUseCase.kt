@@ -43,6 +43,7 @@ class GroupEventsByDayUseCase {
         }
 
         val grouped = mutableMapOf<LocalDate, MutableList<CalendarEvent>>()
+        grouped[today] = mutableListOf()
         for (event in filtered) {
             if (event.isAllDay) {
                 val startDate = event.startTime.toLocalDateTime(event.timezone).date
@@ -76,7 +77,7 @@ class GroupEventsByDayUseCase {
                 }
                 DayGroup(label = label, events = sorted)
             }
-            .filter { it.events.isNotEmpty() }
+            .filter { it.label == "Today" || it.events.isNotEmpty() }
     }
 
     private fun formatDateLabel(date: LocalDate): String {
