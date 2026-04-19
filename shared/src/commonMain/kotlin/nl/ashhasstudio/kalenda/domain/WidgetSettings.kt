@@ -8,7 +8,6 @@ data class WidgetSettings(
     val dayMode: DayMode = DayMode.ROLLING,
     val allDayPosition: AllDayPosition = AllDayPosition.TOP,
     val accounts: List<GoogleAccount> = emptyList(),
-    val showAccountColors: Boolean = false,
     val accentHue: String = "peacock",
     val themeMode: ThemeMode = ThemeMode.DARK,
 )

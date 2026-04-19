@@ -8,17 +8,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import nl.ashhasstudio.kalenda.data.EventCache
 import nl.ashhasstudio.kalenda.configurator.ui.components.ApplyCTA
 import nl.ashhasstudio.kalenda.configurator.ui.components.HomeHero
 import nl.ashhasstudio.kalenda.configurator.ui.components.NavRow
@@ -27,15 +24,22 @@ import nl.ashhasstudio.kalenda.configurator.ui.components.SectionLabel
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetCard
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetDivider
 import nl.ashhasstudio.kalenda.configurator.ui.preview.WidgetPreviewCard
-import nl.ashhasstudio.kalenda.configurator.ui.theme.AccentBlue
 import nl.ashhasstudio.kalenda.configurator.ui.theme.CalColors
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Spacing
 import nl.ashhasstudio.kalenda.configurator.ui.theme.accentColorForHue
 import nl.ashhasstudio.kalenda.data.CalendarRepository
 import nl.ashhasstudio.kalenda.data.SettingsRepository
-import nl.ashhasstudio.kalenda.domain.DayGroup
+import nl.ashhasstudio.kalenda.domain.DayMode
 import nl.ashhasstudio.kalenda.domain.WidgetSettings
 import nl.ashhasstudio.kalenda.usecase.GroupEventsByDayUseCase
+
+// Icon badge color tints (not tokens — these are intentionally different per section).
+private const val ICON_NAME_LAYOUT = "layout"
+private const val ICON_NAME_APPEARANCE = "appearance"
+private const val ICON_NAME_CALENDARS = "calendars"
+private const val NAV_DIVIDER_START_PADDING = 60
 
 @Composable
 fun HomeScreen(
@@ -47,16 +51,16 @@ fun HomeScreen(
     onApplyToWidget: () -> Unit,
 ) {
     val settings by settingsRepository.observeSettings().collectAsState(initial = WidgetSettings())
+    val cache by calendarRepository.observeCachedEvents().collectAsState(initial = EventCache())
     val groupUseCase = remember { GroupEventsByDayUseCase() }
-    var dayGroups by remember { mutableStateOf(emptyList<DayGroup>()) }
     val deviceTz = TimeZone.currentSystemDefault()
 
-    LaunchedEffect(settings) {
-        val cache = calendarRepository.getCachedEvents()
-        dayGroups = groupUseCase(cache.events, settings, Clock.System.now(), deviceTz)
+    val dayGroups = remember(cache, settings) {
+        groupUseCase(cache.events, settings, Clock.System.now(), deviceTz)
     }
 
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     val accent = accentColorForHue(settings.accentHue)
     val now = Clock.System.now().toLocalDateTime(deviceTz)
     val dayOfWeek = now.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
@@ -65,13 +69,12 @@ fun HomeScreen(
     val accountCount = settings.accounts.size
     val activeCalendarCount = settings.accounts.sumOf { acc -> acc.calendars.count { it.enabled } }
     val dayRangeLabel = when (settings.dayMode) {
-        nl.ashhasstudio.kalenda.domain.DayMode.THIS_WEEK -> "Rest of this week"
-        nl.ashhasstudio.kalenda.domain.DayMode.ROLLING -> "${settings.scrollDays} days"
+        DayMode.THIS_WEEK -> strings.homeDayRangeThisWeek
+        DayMode.ROLLING -> strings.homeDayRangeRolling(settings.scrollDays)
     }
     val layoutSummary = "$dayRangeLabel · ${settings.allDayPosition.name.lowercase()}"
-    val appearanceSummary = "Accent · ${settings.accentHue}"
-    val calendarsSummary = "$accountCount account${if (accountCount != 1) "s" else ""} · " +
-        "$activeCalendarCount calendar${if (activeCalendarCount != 1) "s" else ""}"
+    val appearanceSummary = strings.homeAccentSummary(settings.accentHue)
+    val calendarsSummary = strings.homeAccountsSummary(accountCount, activeCalendarCount)
 
     Column(
         modifier = Modifier
@@ -83,44 +86,44 @@ fun HomeScreen(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(top = 12.dp, bottom = 24.dp)
+                .padding(top = Spacing.screenPadding, bottom = Spacing.scrollableBottomPadding)
         ) {
-            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+            Column(modifier = Modifier.padding(horizontal = Spacing.screenPadding)) {
                 HomeHero(
                     dayOfWeek = dayOfWeek,
                     dateLabel = dateLabel,
                     accentColor = accent,
                 )
-                SectionLabel(text = "Preview")
+                SectionLabel(text = strings.homePreviewLabel)
             }
 
             PreviewStage {
                 WidgetPreviewCard(dayGroups = dayGroups, deviceTimezone = deviceTz)
             }
 
-            Column(modifier = Modifier.padding(horizontal = 12.dp)) {
-                SectionLabel(text = "Configure")
+            Column(modifier = Modifier.padding(horizontal = Spacing.screenPadding)) {
+                SectionLabel(text = strings.homeConfigureLabel)
                 WidgetCard {
                     NavRow(
-                        icon = "layout",
+                        icon = ICON_NAME_LAYOUT,
                         tint = accent,
-                        title = "Layout",
+                        title = strings.homeNavLayout,
                         meta = layoutSummary,
                         onClick = onNavigateToLayout,
                     )
-                    WidgetDivider(startPadding = 60)
+                    WidgetDivider(startPadding = NAV_DIVIDER_START_PADDING)
                     NavRow(
-                        icon = "appearance",
+                        icon = ICON_NAME_APPEARANCE,
                         tint = CalColors.lavender,
-                        title = "Appearance",
+                        title = strings.homeNavAppearance,
                         meta = appearanceSummary,
                         onClick = onNavigateToAppearance,
                     )
-                    WidgetDivider(startPadding = 60)
+                    WidgetDivider(startPadding = NAV_DIVIDER_START_PADDING)
                     NavRow(
-                        icon = "calendars",
+                        icon = ICON_NAME_CALENDARS,
                         tint = CalColors.basil,
-                        title = "Calendars",
+                        title = strings.homeNavCalendars,
                         meta = calendarsSummary,
                         onClick = onNavigateToCalendars,
                     )
@@ -128,7 +131,7 @@ fun HomeScreen(
             }
         }
 
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = Spacing.screenPadding, vertical = Spacing.screenPadding)) {
             ApplyCTA(accent = accent, onClick = onApplyToWidget)
         }
     }

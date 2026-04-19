@@ -16,5 +16,8 @@ data class CalendarEvent(
     val endTime: Instant,
     val timezoneId: String
 ) {
-    val timezone: TimeZone get() = TimeZone.of(timezoneId)
+    // Google (and imported .ics files) can emit TZIDs that aren't in the device's zone db.
+    // Falling back to UTC keeps the widget rendering rather than crashing the host process.
+    val timezone: TimeZone
+        get() = runCatching { TimeZone.of(timezoneId) }.getOrElse { TimeZone.UTC }
 }

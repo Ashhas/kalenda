@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Explicit opt-out for all app data extraction. OAuth tokens in EncryptedSharedPreferences
+  are tied to the device's Keystore — if backed up, they can't be decrypted on restore and
+  would cause crashes. Easier to just require re-auth on a new device.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="." />
+    </device-transfer>
+</data-extraction-rules>

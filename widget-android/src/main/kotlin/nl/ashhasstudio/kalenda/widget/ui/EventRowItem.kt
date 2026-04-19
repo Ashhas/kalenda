@@ -3,8 +3,8 @@ package nl.ashhasstudio.kalenda.widget.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalContext
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Box
@@ -22,49 +22,57 @@ import androidx.glance.unit.ColorProvider
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import nl.ashhasstudio.kalenda.domain.CalendarEvent
+import nl.ashhasstudio.kalenda.widget.R
 
-private val OverflowBlue = ColorProvider(Color(0xFF4FC3F7))
+private const val PILL_BG_ALPHA = 0.13f
 
 @Composable
 fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone, theme: WidgetTheme) {
+    val context = LocalContext.current
     val timeText = if (event.isAllDay) {
-        "All day"
+        context.getString(R.string.widget_all_day)
     } else {
         val localTime = event.startTime.toLocalDateTime(deviceTimezone).time
-        String.format("%02d:%02d", localTime.hour, localTime.minute)
+        "${localTime.hour.toString().padStart(2, '0')}:${localTime.minute.toString().padStart(2, '0')}"
     }
 
     val eventColor = Color(event.calendarColor.toInt())
-    val pillBg = eventColor.copy(alpha = 0.13f)
+    val pillBg = eventColor.copy(alpha = PILL_BG_ALPHA)
 
     Box(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 2.dp)
+            .padding(
+                horizontal = WidgetSpacing.eventPillMarginHorizontal,
+                vertical = WidgetSpacing.eventPillMarginVertical,
+            )
     ) {
         Row(
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .cornerRadius(4.dp)
+                .cornerRadius(WidgetShapes.pillRadius)
                 .background(ColorProvider(pillBg))
-                .padding(horizontal = 6.dp, vertical = 4.dp)
+                .padding(
+                    horizontal = WidgetSpacing.eventPillPaddingHorizontal,
+                    vertical = WidgetSpacing.eventPillPaddingVertical,
+                )
         ) {
             Box(
                 modifier = GlanceModifier
-                    .width(3.dp)
-                    .height(16.dp)
-                    .cornerRadius(2.dp)
+                    .width(WidgetSizes.eventBarWidth)
+                    .height(WidgetSizes.eventBarHeight)
+                    .cornerRadius(WidgetShapes.barRadius)
                     .background(ColorProvider(eventColor))
             ) {}
 
-            Spacer(modifier = GlanceModifier.width(10.dp))
+            Spacer(modifier = GlanceModifier.width(WidgetSpacing.barToTextGap))
 
             Column(modifier = GlanceModifier.defaultWeight()) {
                 Text(
                     text = event.title,
                     style = TextStyle(
                         color = ColorProvider(theme.textPrimary),
-                        fontSize = 14.sp,
+                        fontSize = WidgetFontSizes.body,
                         fontWeight = FontWeight.Normal
                     ),
                     maxLines = 1
@@ -77,7 +85,7 @@ fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone, theme: WidgetTh
                 text = timeText,
                 style = TextStyle(
                     color = ColorProvider(theme.textPrimary),
-                    fontSize = 12.sp,
+                    fontSize = WidgetFontSizes.small,
                     fontWeight = FontWeight.Normal
                 )
             )
@@ -86,36 +94,45 @@ fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone, theme: WidgetTh
 }
 
 @Composable
-fun OverflowItem(moreCount: Int) {
-    val pillBg = Color(0xFF4FC3F7).copy(alpha = 0.13f)
+fun OverflowItem(moreCount: Int, theme: WidgetTheme) {
+    val context = LocalContext.current
+    val accent = theme.accent
+    val pillBg = accent.copy(alpha = PILL_BG_ALPHA)
 
     Box(
         modifier = GlanceModifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = 2.dp)
+            .padding(
+                horizontal = WidgetSpacing.eventPillMarginHorizontal,
+                vertical = WidgetSpacing.eventPillMarginVertical,
+            )
     ) {
         Row(
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .cornerRadius(4.dp)
+                .cornerRadius(WidgetShapes.pillRadius)
                 .background(ColorProvider(pillBg))
-                .padding(horizontal = 6.dp, vertical = 4.dp)
+                .padding(
+                    horizontal = WidgetSpacing.eventPillPaddingHorizontal,
+                    vertical = WidgetSpacing.eventPillPaddingVertical,
+                )
         ) {
             Box(
                 modifier = GlanceModifier
-                    .width(3.dp)
-                    .height(16.dp)
-                    .cornerRadius(2.dp)
-                    .background(OverflowBlue)
+                    .width(WidgetSizes.eventBarWidth)
+                    .height(WidgetSizes.eventBarHeight)
+                    .cornerRadius(WidgetShapes.barRadius)
+                    .background(ColorProvider(accent))
             ) {}
 
-            Spacer(modifier = GlanceModifier.width(10.dp))
+            Spacer(modifier = GlanceModifier.width(WidgetSpacing.barToTextGap))
 
+            val template = if (moreCount > 1) R.string.widget_more_events_many else R.string.widget_more_events_one
             Text(
-                text = "$moreCount more event${if (moreCount > 1) "s" else ""}...",
+                text = context.getString(template, moreCount),
                 style = TextStyle(
-                    color = OverflowBlue,
-                    fontSize = 13.sp,
+                    color = ColorProvider(accent),
+                    fontSize = WidgetFontSizes.subtle,
                     fontWeight = FontWeight.Medium
                 )
             )

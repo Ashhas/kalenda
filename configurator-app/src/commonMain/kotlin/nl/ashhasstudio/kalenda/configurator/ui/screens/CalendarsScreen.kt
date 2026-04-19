@@ -2,6 +2,7 @@ package nl.ashhasstudio.kalenda.configurator.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,11 +41,17 @@ import nl.ashhasstudio.kalenda.configurator.ui.components.SubBar
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetCard
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetSectionHeader
 import nl.ashhasstudio.kalenda.configurator.ui.theme.CalColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.FontSizes
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Shapes
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Spacing
 import nl.ashhasstudio.kalenda.configurator.ui.theme.accentColorForHue
 import nl.ashhasstudio.kalenda.data.CalendarRepository
 import nl.ashhasstudio.kalenda.data.SettingsRepository
 import nl.ashhasstudio.kalenda.domain.WidgetSettings
+
+private val ErrorRed = Color(0xFFE57373)
 
 @Composable
 fun CalendarsScreen(
@@ -55,12 +64,15 @@ fun CalendarsScreen(
     val settings by settingsRepository.observeSettings().collectAsState(initial = WidgetSettings())
     val scope = rememberCoroutineScope()
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     val accent = accentColorForHue(settings.accentHue)
 
     val accountColors = listOf(
         CalColors.peacock, CalColors.flamingo, CalColors.lavender,
         CalColors.basil, CalColors.banana, CalColors.tomato,
     )
+
+    val accountErrors = remember { mutableStateMapOf<String, String>() }
 
     LaunchedEffect(settings.accounts.map { it.id }) {
         var fetchedAny = false
@@ -70,8 +82,11 @@ fun CalendarsScreen(
                     val calendars = calendarRepository.fetchCalendarList(account)
                     val updated = account.copy(calendars = calendars)
                     settingsRepository.updateAccount(updated)
+                    accountErrors.remove(account.id)
                     fetchedAny = true
-                } catch (_: Exception) { }
+                } catch (e: Exception) {
+                    accountErrors[account.id] = e.message ?: strings.calendarsErrorGeneric
+                }
             }
         }
         if (fetchedAny) onCalendarsChanged()
@@ -83,13 +98,13 @@ fun CalendarsScreen(
             .background(colors.background)
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(12.dp)
+            .padding(Spacing.screenPadding)
     ) {
-        SubBar(title = "Calendars", onBack = onBack)
+        SubBar(title = strings.calendarsTitle, onBack = onBack)
 
         WidgetCard {
             WidgetSectionHeader(
-                label = "${settings.accounts.size} connected",
+                label = strings.calendarsConnectedCount(settings.accounts.size),
                 topSpace = 12
             )
 
@@ -109,9 +124,7 @@ fun CalendarsScreen(
                 AccountRow(
                     color = color,
                     email = account.email,
-                    enabled = true,
                     calendars = calendarInfos,
-                    onToggle = { },
                     onRemove = {
                         scope.launch {
                             settingsRepository.removeAccount(account.id)
@@ -133,50 +146,68 @@ fun CalendarsScreen(
                         }
                     },
                 )
+                if (account.needsReauth) {
+                    ErrorMessage(strings.calendarsNeedsReauth)
+                }
+                val err = accountErrors[account.id]
+                if (err != null) {
+                    ErrorMessage(strings.calendarsErrorWithMessage(err))
+                }
             }
 
             AddAccountRow(onClick = onAddAccount)
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.screenPadding))
 
         ExplainerCard(accent = accent)
     }
 }
 
 @Composable
+private fun ErrorMessage(text: String) {
+    Text(
+        text = text,
+        color = ErrorRed,
+        fontSize = FontSizes.tiny,
+        modifier = Modifier.padding(start = 56.dp, end = 16.dp, bottom = 8.dp),
+    )
+}
+
+@Composable
 private fun ExplainerCard(accent: Color) {
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     WidgetCard {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "What can I do here?",
+                text = strings.calendarsExplainerTitle,
                 color = colors.textPrimary,
-                fontSize = 13.sp,
+                fontSize = FontSizes.subtle,
                 fontWeight = FontWeight.SemiBold,
             )
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(verticalAlignment = Alignment.Top) {
-                androidx.compose.foundation.layout.Box(
+                Box(
                     modifier = Modifier
-                        .padding(top = 4.dp)
+                        .padding(top = Spacing.tightGap)
                         .size(10.dp)
-                        .clip(RoundedCornerShape(2.dp))
+                        .clip(RoundedCornerShape(Shapes.checkboxRadius))
                         .background(accent)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.elementGap))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Tap a calendar row",
+                        text = strings.calendarsExplainerTapRow,
                         color = colors.textPrimary,
-                        fontSize = 12.sp,
+                        fontSize = FontSizes.small,
                         lineHeight = 16.sp,
                     )
                     Text(
-                        text = "Show or hide that calendar in the widget",
+                        text = strings.calendarsExplainerTapRowBody,
                         color = colors.textMuted,
-                        fontSize = 11.sp,
+                        fontSize = FontSizes.tiny,
                         lineHeight = 15.sp,
                         modifier = Modifier.padding(top = 1.dp),
                     )
@@ -199,7 +230,7 @@ private fun ExplainerCard(accent: Color) {
                     val stroke = Stroke(width = size.width * 0.1f, cap = StrokeCap.Round)
                     drawCircle(accent, r, style = stroke)
                     listOf(0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f).forEach { angle ->
-                        val rad = Math.toRadians(angle.toDouble())
+                        val rad = (angle.toDouble() * kotlin.math.PI) / 180.0
                         val cos = kotlin.math.cos(rad).toFloat()
                         val sin = kotlin.math.sin(rad).toFloat()
                         drawLine(
@@ -210,18 +241,18 @@ private fun ExplainerCard(accent: Color) {
                         )
                     }
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(Spacing.elementGap))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Tap the sun icon",
+                        text = strings.calendarsExplainerTapSun,
                         color = colors.textPrimary,
-                        fontSize = 12.sp,
+                        fontSize = FontSizes.small,
                         lineHeight = 16.sp,
                     )
                     Text(
-                        text = "Hide all-day events for that calendar while keeping timed events visible. Useful for busy holiday calendars that clutter your view.",
+                        text = strings.calendarsExplainerTapSunBody,
                         color = colors.textMuted,
-                        fontSize = 11.sp,
+                        fontSize = FontSizes.tiny,
                         lineHeight = 15.sp,
                         modifier = Modifier.padding(top = 1.dp),
                     )

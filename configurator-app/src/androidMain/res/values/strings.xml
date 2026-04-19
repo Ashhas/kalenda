@@ -1,4 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Kalenda</string>
+
+    <!-- Home screen -->
+    <string name="home_preview_label">Preview</string>
+    <string name="home_configure_label">Configure</string>
+    <string name="home_nav_layout">Layout</string>
+    <string name="home_nav_appearance">Appearance</string>
+    <string name="home_nav_calendars">Calendars</string>
+    <string name="home_day_range_this_week">Rest of this week</string>
+    <string name="home_day_range_rolling">%1$d days</string>
+    <string name="home_accent_summary">Accent · %1$s</string>
+    <string name="home_accounts_summary">%1$d account%2$s · %3$d calendar%4$s</string>
+
+    <!-- Layout screen -->
+    <string name="layout_title">Layout</string>
+    <string name="layout_header_days_left">days left</string>
+    <string name="layout_header_days_visible">days visible</string>
+    <string name="layout_subtitle_this_week">Shows only the remaining days of this week (Mon–Sun)</string>
+    <string name="layout_subtitle_rolling">How many days of events the widget shows</string>
+    <string name="layout_date_range">Date range</string>
+    <string name="layout_option_rolling">Rolling days</string>
+    <string name="layout_option_this_week">This week</string>
+    <string name="layout_this_week_hint">Week starts on Monday. The widget shows today plus the rest of this week — at the start of a new week it refills automatically.</string>
+    <string name="layout_all_day">All-day events</string>
+    <string name="all_day_option_top">Top</string>
+    <string name="all_day_option_bottom">Bottom</string>
+    <string name="all_day_option_hidden">Hidden</string>
+
+    <!-- Appearance screen -->
+    <string name="appearance_title">Appearance</string>
+    <string name="appearance_light_mode">Light mode</string>
+    <string name="appearance_light_mode_on">Bright theme for both config &amp; widget</string>
+    <string name="appearance_light_mode_off">Dark theme (default)</string>
+    <string name="appearance_accent_color">Accent color</string>
+
+    <!-- Calendars screen -->
+    <string name="calendars_title">Calendars</string>
+    <string name="calendars_connected_count">%1$d connected</string>
+    <string name="calendars_error_generic">Couldn\'t load calendars</string>
+    <string name="calendars_error_with_message">Couldn\'t load calendars: %1$s</string>
+    <string name="calendars_needs_reauth">Sign-in expired — remove and re-add this account</string>
+    <string name="calendars_active_summary">%1$d of %2$d calendar%3$s active</string>
+    <string name="calendars_all_day_hidden">All-day events hidden</string>
+    <string name="calendars_add_google">Connect Google account</string>
+    <string name="calendars_explainer_title">What can I do here?</string>
+    <string name="calendars_explainer_tap_row">Tap a calendar row</string>
+    <string name="calendars_explainer_tap_row_body">Show or hide that calendar in the widget</string>
+    <string name="calendars_explainer_tap_sun">Tap the sun icon</string>
+    <string name="calendars_explainer_tap_sun_body">Hide all-day events for that calendar while keeping timed events visible. Useful for busy holiday calendars that clutter your view.</string>
+    <string name="account_remove_title">Remove account?</string>
+    <string name="account_remove_body">%1$s will be removed from Kalenda. You can add it again later.</string>
+    <string name="account_remove_confirm">Remove</string>
+    <string name="account_remove_cancel">Cancel</string>
+
+    <!-- Apply CTA -->
+    <string name="apply_to_widget">Apply to widget</string>
+
+    <!-- OAuth / auth toasts -->
+    <string name="auth_failed_with_error">Authentication failed: %1$s</string>
+    <string name="auth_failed_state_mismatch">Authentication failed: state mismatch</string>
+    <string name="auth_account_added">Added %1$s</string>
+    <string name="auth_exchange_failed">Failed: %1$s</string>
+    <string name="auth_no_browser">No browser app installed — can\'t sign in</string>
+
+    <!-- Apply-widget toasts -->
+    <string name="toast_widget_updated">Widget updated</string>
+    <string name="toast_widget_offline">Applied — offline, widget using cached data</string>
+    <string name="toast_widget_cant_refresh">Applied — couldn\'t refresh events</string>
+
+    <!-- Widget body -->
+    <string name="widget_no_upcoming">No upcoming events</string>
+    <string name="widget_error">Couldn\'t load — tap to open Kalenda</string>
+    <string name="widget_no_events_today">No events today</string>
+    <string name="widget_all_day">All day</string>
+    <string name="widget_more_events">%1$d more event%2$s…</string>
 </resources>

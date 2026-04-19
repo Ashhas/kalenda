@@ -1,5 +1,6 @@
 package nl.ashhasstudio.kalenda.usecase
 
+import nl.ashhasstudio.kalenda.domain.AllDayPosition
 import nl.ashhasstudio.kalenda.domain.CalendarEvent
 import nl.ashhasstudio.kalenda.domain.DayGroup
 import nl.ashhasstudio.kalenda.domain.DayMode
@@ -13,8 +14,6 @@ import kotlinx.datetime.toLocalDateTime
 
 class GroupEventsByDayUseCase {
 
-    private val sortUseCase = SortEventsUseCase()
-
     operator fun invoke(
         events: List<CalendarEvent>,
         settings: WidgetSettings,
@@ -24,7 +23,7 @@ class GroupEventsByDayUseCase {
         val today = referenceDate.toLocalDateTime(deviceTimezone).date
         val tomorrow = today.plus(1, DateTimeUnit.DAY)
         val effectiveDays = when (settings.dayMode) {
-            DayMode.THIS_WEEK -> 8 - (today.dayOfWeek.ordinal + 1)
+            DayMode.THIS_WEEK -> daysLeftInWeekInclusive(today)
             DayMode.ROLLING -> settings.scrollDays
         }
         val endDate = today.plus(effectiveDays, DateTimeUnit.DAY)
@@ -74,7 +73,7 @@ class GroupEventsByDayUseCase {
         return grouped.entries
             .sortedBy { it.key }
             .map { (date, dayEvents) ->
-                val sorted = sortUseCase(dayEvents, settings.allDayPosition)
+                val sorted = sortEvents(dayEvents, settings.allDayPosition)
                 val label = when (date) {
                     today -> "Today"
                     tomorrow -> "Tomorrow"
@@ -89,5 +88,23 @@ class GroupEventsByDayUseCase {
         val monthName = date.month.name.lowercase().replaceFirstChar { it.uppercase() }
         val dayOfWeek = date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
         return "${monthName} ${date.dayOfMonth}  ${dayOfWeek}"
+    }
+}
+
+/** Returns days remaining this week, Monday-start, inclusive of today. Monday=7, Sunday=1. */
+fun daysLeftInWeekInclusive(today: LocalDate): Int {
+    // In kotlinx-datetime, DayOfWeek.MONDAY.ordinal == 0, SUNDAY.ordinal == 6.
+    // ISO day number is ordinal + 1 (Mon=1..Sun=7). Days left = 8 - ISO.
+    return 8 - (today.dayOfWeek.ordinal + 1)
+}
+
+/** Sort events by all-day position preference. Moved here from SortEventsUseCase. */
+fun sortEvents(events: List<CalendarEvent>, allDayPosition: AllDayPosition): List<CalendarEvent> {
+    val (allDay, timed) = events.partition { it.isAllDay }
+    val sortedTimed = timed.sortedBy { it.startTime }
+    return when (allDayPosition) {
+        AllDayPosition.TOP -> allDay + sortedTimed
+        AllDayPosition.BOTTOM -> sortedTimed + allDay
+        AllDayPosition.HIDDEN -> sortedTimed
     }
 }

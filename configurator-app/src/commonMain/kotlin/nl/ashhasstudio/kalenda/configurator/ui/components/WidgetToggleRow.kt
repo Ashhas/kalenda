@@ -40,7 +40,11 @@ fun WidgetToggleRow(
                 .width(3.dp)
                 .height(30.dp)
                 .clip(RoundedCornerShape(1.5.dp))
-                .background(if (checked) barColor else Color.White.copy(alpha = 0.18f))
+                .background(
+                    if (checked) barColor
+                    else if (colors.isDark) Color.White.copy(alpha = 0.18f)
+                    else Color.Black.copy(alpha = 0.14f)
+                )
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {

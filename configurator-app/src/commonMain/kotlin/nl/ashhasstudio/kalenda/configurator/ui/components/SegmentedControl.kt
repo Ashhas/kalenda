@@ -31,7 +31,7 @@ fun <T> SegmentedControl(
         modifier = modifier
             .padding(horizontal = 17.dp, vertical = 6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.White.copy(alpha = 0.05f))
+            .background(colors.rowHover)
             .padding(3.dp)
     ) {
         options.forEach { opt ->
@@ -40,7 +40,7 @@ fun <T> SegmentedControl(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (active) Color.White.copy(alpha = 0.10f) else Color.Transparent)
+                    .background(if (active) colors.rowPress else Color.Transparent)
                     .clickable { onSelect(opt.value) }
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center

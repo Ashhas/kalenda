@@ -1,15 +1,13 @@
 package nl.ashhasstudio.kalenda.data
 
+import android.util.Log
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import nl.ashhasstudio.kalenda.domain.GoogleAccount
 
 class GoogleTokenRefresher(
@@ -17,22 +15,45 @@ class GoogleTokenRefresher(
     private val client: HttpClient = HttpClientProvider.instance
 ) : TokenRefresher {
 
-    override suspend fun refreshAccount(account: GoogleAccount): GoogleAccount? {
-        if (account.refreshToken.isBlank()) return null
-        val response = client.submitForm(
-            url = "https://oauth2.googleapis.com/token",
-            formParameters = parameters {
-                append("client_id", clientId)
-                append("refresh_token", account.refreshToken)
-                append("grant_type", "refresh_token")
+    override suspend fun refresh(account: GoogleAccount): TokenRefreshOutcome {
+        if (account.refreshToken.isBlank()) return TokenRefreshOutcome.NeedsReauth
+        val response = try {
+            client.submitForm(
+                url = "https://oauth2.googleapis.com/token",
+                formParameters = parameters {
+                    append("client_id", clientId)
+                    append("refresh_token", account.refreshToken)
+                    append("grant_type", "refresh_token")
+                }
+            )
+        } catch (e: Exception) {
+            Log.w("KalendaTokenRefresh", "Network error refreshing ${account.email}", e)
+            return TokenRefreshOutcome.Transient("network: ${e.message}")
+        }
+
+        return when {
+            response.status.isSuccess() -> {
+                val body: RefreshTokenResponse = response.body()
+                TokenRefreshOutcome.Success(
+                    account.copy(
+                        accessToken = body.accessToken,
+                        refreshToken = body.refreshToken ?: account.refreshToken,
+                        needsReauth = false,
+                    )
+                )
             }
-        )
-        if (!response.status.isSuccess()) return null
-        val tokenResponse: RefreshTokenResponse = response.body()
-        return account.copy(
-            accessToken = tokenResponse.accessToken,
-            refreshToken = tokenResponse.refreshToken ?: account.refreshToken
-        )
+            // 4xx from Google's token endpoint almost always means invalid_grant
+            // (revoked, expired, user changed password). Permanent without re-auth.
+            response.status.value in 400..499 -> {
+                val body = runCatching { response.bodyAsText() }.getOrDefault("")
+                Log.w("KalendaTokenRefresh", "Permanent refresh failure for ${account.email}: ${response.status} $body")
+                TokenRefreshOutcome.NeedsReauth
+            }
+            else -> {
+                Log.w("KalendaTokenRefresh", "Transient refresh failure ${response.status} for ${account.email}")
+                TokenRefreshOutcome.Transient("http: ${response.status}")
+            }
+        }
     }
 }
 

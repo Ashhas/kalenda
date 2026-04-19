@@ -6,9 +6,7 @@ import kotlinx.datetime.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class SortEventsUseCaseTest {
-
-    private val useCase = SortEventsUseCase()
+class SortEventsTest {
 
     private fun event(id: String, start: String, allDay: Boolean = false) =
         CalendarEvent(
@@ -25,7 +23,7 @@ class SortEventsUseCaseTest {
             event("late", "2026-04-17T14:00:00Z"),
             event("early", "2026-04-17T08:00:00Z")
         )
-        val sorted = useCase(events, AllDayPosition.TOP)
+        val sorted = sortEvents(events, AllDayPosition.TOP)
         assertEquals("early", sorted[0].id)
         assertEquals("late", sorted[1].id)
     }
@@ -36,7 +34,7 @@ class SortEventsUseCaseTest {
             event("timed", "2026-04-17T09:00:00Z", allDay = false),
             event("allday", "2026-04-17T00:00:00Z", allDay = true)
         )
-        val sorted = useCase(events, AllDayPosition.BOTTOM)
+        val sorted = sortEvents(events, AllDayPosition.BOTTOM)
         assertEquals("timed", sorted[0].id)
         assertEquals("allday", sorted[1].id)
     }
@@ -47,7 +45,7 @@ class SortEventsUseCaseTest {
             event("timed", "2026-04-17T09:00:00Z", allDay = false),
             event("allday", "2026-04-17T00:00:00Z", allDay = true)
         )
-        val sorted = useCase(events, AllDayPosition.HIDDEN)
+        val sorted = sortEvents(events, AllDayPosition.HIDDEN)
         assertEquals(1, sorted.size)
         assertEquals("timed", sorted[0].id)
     }

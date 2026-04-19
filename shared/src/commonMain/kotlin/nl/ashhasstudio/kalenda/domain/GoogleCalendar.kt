@@ -10,5 +10,4 @@ data class GoogleCalendar(
     val color: Long,
     val enabled: Boolean = true,
     val showAllDay: Boolean = true,
-    val primary: Boolean = false,
 )

@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import nl.ashhasstudio.kalenda.configurator.ui.theme.AccentBlue
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
 
 @Composable
 fun KalendaSwitch(
@@ -24,6 +25,8 @@ fun KalendaSwitch(
     onCheckedChange: (Boolean) -> Unit,
     accent: Color = AccentBlue,
 ) {
+    val colors = LocalKalendaColors.current
+    val offTrack = if (colors.isDark) Color.White.copy(alpha = 0.18f) else Color.Black.copy(alpha = 0.14f)
     val thumbOffset = animateDpAsState(
         targetValue = if (checked) 18.dp else 2.dp,
         animationSpec = tween(160)
@@ -32,7 +35,7 @@ fun KalendaSwitch(
         modifier = Modifier
             .size(width = 40.dp, height = 24.dp)
             .clip(CircleShape)
-            .background(if (checked) accent else Color.White.copy(alpha = 0.18f))
+            .background(if (checked) accent else offTrack)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null

@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
@@ -32,8 +31,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import nl.ashhasstudio.kalenda.configurator.ui.theme.FontSizes
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Sizes
+
+private val AvatarTextColor = Color(0xFF0B1220)
 
 data class CalendarInfo(
     val id: String,
@@ -47,14 +50,13 @@ data class CalendarInfo(
 fun AccountRow(
     color: Color,
     email: String,
-    enabled: Boolean,
     calendars: List<CalendarInfo>,
-    onToggle: () -> Unit,
     onRemove: () -> Unit,
     onToggleCalendar: (String) -> Unit,
     onToggleCalendarAllDay: (String) -> Unit,
 ) {
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     var expanded by remember { mutableStateOf(true) }
     val chevronRotation by animateFloatAsState(if (expanded) 90f else 0f)
     val activeCals = calendars.count { it.enabled }
@@ -69,21 +71,21 @@ fun AccountRow(
             Text(
                 text = "›",
                 color = colors.textMuted,
-                fontSize = 14.sp,
+                fontSize = FontSizes.body,
                 modifier = Modifier.rotate(chevronRotation)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(Sizes.accountAvatar)
                     .clip(CircleShape)
-                    .background(if (enabled) color else Color.White.copy(alpha = 0.14f)),
+                    .background(color),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = email.first().uppercase(),
-                    color = Color(0xFF0B1220),
-                    fontSize = 11.sp,
+                    color = AvatarTextColor,
+                    fontSize = FontSizes.tiny,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -91,25 +93,23 @@ fun AccountRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = email,
-                    color = if (enabled) colors.textPrimary else colors.textMuted,
-                    fontSize = 14.sp,
+                    color = colors.textPrimary,
+                    fontSize = FontSizes.body,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = if (enabled) "$activeCals of ${calendars.size} calendar${if (calendars.size != 1) "s" else ""} active" else "Paused",
+                    text = strings.calendarsActiveSummary(activeCals, calendars.size),
                     color = colors.textSubtle,
-                    fontSize = 11.sp,
+                    fontSize = FontSizes.tiny,
                     modifier = Modifier.padding(top = 1.dp)
                 )
             }
-            KalendaSwitch(checked = enabled, onCheckedChange = { onToggle() }, accent = color)
-            Spacer(modifier = Modifier.width(8.dp))
             var confirmRemove by remember { mutableStateOf(false) }
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(Sizes.closeButton)
                     .clip(CircleShape)
                     .clickable { confirmRemove = true },
                 contentAlignment = Alignment.Center,
@@ -118,12 +118,12 @@ fun AccountRow(
                     val s = size.width / 10f
                     val stroke = 1.5f * s
                     drawLine(
-                        Color(0xFF9E9E9E),
+                        colors.textSubtle,
                         Offset(1.5f * s, 1.5f * s), Offset(8.5f * s, 8.5f * s),
                         stroke, StrokeCap.Round,
                     )
                     drawLine(
-                        Color(0xFF9E9E9E),
+                        colors.textSubtle,
                         Offset(8.5f * s, 1.5f * s), Offset(1.5f * s, 8.5f * s),
                         stroke, StrokeCap.Round,
                     )
@@ -132,27 +132,23 @@ fun AccountRow(
             if (confirmRemove) {
                 AlertDialog(
                     onDismissRequest = { confirmRemove = false },
-                    title = { Text("Remove account?") },
-                    text = { Text("$email will be removed from Kalenda. You can add it again later.") },
+                    title = { Text(strings.accountRemoveTitle) },
+                    text = { Text(strings.accountRemoveBody(email)) },
                     confirmButton = {
                         TextButton(onClick = {
                             confirmRemove = false
                             onRemove()
-                        }) { Text("Remove") }
+                        }) { Text(strings.accountRemoveConfirm) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { confirmRemove = false }) { Text("Cancel") }
+                        TextButton(onClick = { confirmRemove = false }) { Text(strings.accountRemoveCancel) }
                     },
                 )
             }
         }
 
         AnimatedVisibility(visible = expanded && calendars.isNotEmpty()) {
-            Column(
-                modifier = Modifier
-                    .padding(start = 38.dp, end = 10.dp, bottom = 6.dp)
-                    .alpha(if (enabled) 1f else 0.5f)
-            ) {
+            Column(modifier = Modifier.padding(start = 38.dp, end = 10.dp, bottom = 6.dp)) {
                 calendars.forEach { cal ->
                     CalendarChildRow(
                         color = cal.color,
@@ -161,7 +157,7 @@ fun AccountRow(
                         showAllDay = cal.showAllDay,
                         onToggle = { onToggleCalendar(cal.id) },
                         onToggleAllDay = { onToggleCalendarAllDay(cal.id) },
-                        parentEnabled = enabled,
+                        parentEnabled = true,
                     )
                 }
             }

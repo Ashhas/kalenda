@@ -37,13 +37,15 @@ fun DayStepper(
         for (n in min..max) {
             val isCurrent = n == value
             val isActive = n <= value
+            val activeBg = if (colors.isDark) Color.White.copy(alpha = 0.08f) else Color.Black.copy(alpha = 0.06f)
+            val mutedBg = if (colors.isDark) Color.White.copy(alpha = 0.03f) else Color.Black.copy(alpha = 0.03f)
             val bg = when {
                 isCurrent -> accent
-                isActive -> Color.White.copy(alpha = 0.08f)
-                else -> Color.White.copy(alpha = 0.03f)
+                isActive -> activeBg
+                else -> mutedBg
             }
             val textColor = when {
-                isCurrent -> Color(0xFF0B1220)
+                isCurrent -> if (colors.isDark) Color(0xFF0B1220) else Color.White
                 isActive -> colors.textPrimary
                 else -> colors.textMuted
             }

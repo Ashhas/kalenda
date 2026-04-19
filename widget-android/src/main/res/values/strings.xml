@@ -1,3 +1,11 @@
 <resources>
     <string name="widget_description">Kalenda Calendar Widget</string>
+
+    <!-- Widget body -->
+    <string name="widget_no_upcoming">No upcoming events</string>
+    <string name="widget_error">Couldn\'t load — tap to open Kalenda</string>
+    <string name="widget_no_events_today">No events today</string>
+    <string name="widget_all_day">All day</string>
+    <string name="widget_more_events_one">%1$d more event…</string>
+    <string name="widget_more_events_many">%1$d more events…</string>
 </resources>

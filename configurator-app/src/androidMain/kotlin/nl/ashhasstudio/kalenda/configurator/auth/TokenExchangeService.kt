@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -14,7 +15,7 @@ class TokenExchangeService(private val clientId: String) {
 
     private val client: HttpClient = HttpClientProvider.instance
 
-    suspend fun exchangeCode(authCode: String, redirectUri: String): GoogleAccount {
+    suspend fun exchangeCode(authCode: String, redirectUri: String, codeVerifier: String): GoogleAccount {
         val tokenExchangeResponse = client.submitForm(
             url = "https://oauth2.googleapis.com/token",
             formParameters = parameters {
@@ -22,10 +23,12 @@ class TokenExchangeService(private val clientId: String) {
                 append("client_id", clientId)
                 append("redirect_uri", redirectUri)
                 append("grant_type", "authorization_code")
+                if (codeVerifier.isNotEmpty()) append("code_verifier", codeVerifier)
             }
         )
         if (!tokenExchangeResponse.status.isSuccess()) {
-            throw Exception("Token exchange failed: ${tokenExchangeResponse.status}")
+            val body = runCatching { tokenExchangeResponse.bodyAsText() }.getOrDefault("")
+            throw Exception("Token exchange failed (${tokenExchangeResponse.status}): $body")
         }
         val tokenResponse: TokenResponse = tokenExchangeResponse.body()
 
@@ -44,27 +47,7 @@ class TokenExchangeService(private val clientId: String) {
             refreshToken = tokenResponse.refreshToken ?: ""
         )
     }
-
-    suspend fun refreshAccessToken(refreshToken: String): TokenRefreshResult? {
-        if (refreshToken.isBlank()) return null
-        val response = client.submitForm(
-            url = "https://oauth2.googleapis.com/token",
-            formParameters = parameters {
-                append("client_id", clientId)
-                append("refresh_token", refreshToken)
-                append("grant_type", "refresh_token")
-            }
-        )
-        if (!response.status.isSuccess()) return null
-        val tokenResponse: TokenResponse = response.body()
-        return TokenRefreshResult(
-            accessToken = tokenResponse.accessToken,
-            refreshToken = tokenResponse.refreshToken ?: refreshToken
-        )
-    }
 }
-
-data class TokenRefreshResult(val accessToken: String, val refreshToken: String)
 
 @Serializable
 private data class TokenResponse(

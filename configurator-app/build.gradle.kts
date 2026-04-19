@@ -13,6 +13,9 @@ val localProperties = Properties().apply {
     if (file.exists()) load(file.inputStream())
 }
 val oauthClientId: String = localProperties.getProperty("GOOGLE_OAUTH_CLIENT_ID", "")
+require(oauthClientId.isNotBlank()) {
+    "GOOGLE_OAUTH_CLIENT_ID is missing. Add it to local.properties before building."
+}
 
 kotlin {
     androidTarget {

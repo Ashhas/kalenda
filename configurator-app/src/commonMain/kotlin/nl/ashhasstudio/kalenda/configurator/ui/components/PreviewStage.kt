@@ -10,31 +10,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
 
 @Composable
 fun PreviewStage(content: @Composable () -> Unit) {
+    val colors = LocalKalendaColors.current
+    // Evokes "widget floating on wallpaper" in both themes: dark mode uses a subtle
+    // green-tinted gradient; light mode uses a neutral grey wash.
+    val gradient = if (colors.isDark) {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFF2A3B2A),
+                Color(0xFF1A2A1E),
+                Color(0xFF263526),
+            )
+        )
+    } else {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFFE8EAEE),
+                Color(0xFFDDE1E7),
+                Color(0xFFEEF0F3),
+            )
+        )
+    }
+    val sheen = if (colors.isDark) Color.White.copy(alpha = 0.06f) else Color.White.copy(alpha = 0.20f)
+    val vignette = if (colors.isDark) Color.Black.copy(alpha = 0.35f) else Color.Black.copy(alpha = 0.10f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF2A3B2A),
-                        Color(0xFF1A2A1E),
-                        Color(0xFF263526),
-                    )
-                )
-            )
+            .background(gradient)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.06f),
-                            Color.Transparent,
-                        ),
+                        colors = listOf(sheen, Color.Transparent),
                         radius = 600f,
                     )
                 )
@@ -44,10 +56,7 @@ fun PreviewStage(content: @Composable () -> Unit) {
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.35f),
-                        )
+                        colors = listOf(Color.Transparent, vignette)
                     )
                 )
         )

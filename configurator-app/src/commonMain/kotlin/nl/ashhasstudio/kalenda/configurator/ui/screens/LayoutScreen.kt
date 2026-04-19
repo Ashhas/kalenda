@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,12 +31,16 @@ import nl.ashhasstudio.kalenda.configurator.ui.components.SubBar
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetCard
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetDivider
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetSectionHeader
+import nl.ashhasstudio.kalenda.configurator.ui.theme.FontSizes
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Spacing
 import nl.ashhasstudio.kalenda.configurator.ui.theme.accentColorForHue
 import nl.ashhasstudio.kalenda.data.SettingsRepository
 import nl.ashhasstudio.kalenda.domain.AllDayPosition
 import nl.ashhasstudio.kalenda.domain.DayMode
 import nl.ashhasstudio.kalenda.domain.WidgetSettings
+import nl.ashhasstudio.kalenda.usecase.daysLeftInWeekInclusive
 
 @Composable
 fun LayoutScreen(
@@ -47,23 +50,24 @@ fun LayoutScreen(
     val settings by settingsRepository.observeSettings().collectAsState(initial = WidgetSettings())
     val scope = rememberCoroutineScope()
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     val accent = accentColorForHue(settings.accentHue)
 
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val daysLeftThisWeek = 8 - (today.dayOfWeek.ordinal + 1)
+    val daysLeftThisWeek = daysLeftInWeekInclusive(today)
     val headerNumber: Int
     val headerLabel: String
     val headerSubtitle: String
     when (settings.dayMode) {
         DayMode.THIS_WEEK -> {
             headerNumber = daysLeftThisWeek
-            headerLabel = "days left"
-            headerSubtitle = "Shows only the remaining days of this week (Mon–Sun)"
+            headerLabel = strings.layoutHeaderDaysLeft
+            headerSubtitle = strings.layoutSubtitleThisWeek
         }
         DayMode.ROLLING -> {
             headerNumber = settings.scrollDays
-            headerLabel = "days visible"
-            headerSubtitle = "How many days of events the widget shows"
+            headerLabel = strings.layoutHeaderDaysVisible
+            headerSubtitle = strings.layoutSubtitleRolling
         }
     }
 
@@ -73,44 +77,51 @@ fun LayoutScreen(
             .background(colors.background)
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(12.dp)
+            .padding(Spacing.screenPadding)
     ) {
-        SubBar(title = "Layout", onBack = onBack)
+        SubBar(title = strings.layoutTitle, onBack = onBack)
 
         WidgetCard {
-            Column(modifier = Modifier.padding(start = 17.dp, end = 17.dp, top = 18.dp, bottom = 8.dp)) {
+            Column(
+                modifier = Modifier.padding(
+                    start = Spacing.sectionLeftPadding,
+                    end = Spacing.sectionLeftPadding,
+                    top = 18.dp,
+                    bottom = 8.dp,
+                )
+            ) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = headerNumber.toString(),
-                        color = Color.White,
-                        fontSize = 34.sp,
+                        color = colors.textPrimary,
+                        fontSize = FontSizes.heroNumber,
                         fontWeight = FontWeight.Bold,
                         lineHeight = 36.sp,
                         letterSpacing = (-0.5).sp,
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(Spacing.itemGap))
                     Text(
                         text = headerLabel,
                         color = accent,
-                        fontSize = 15.sp,
+                        fontSize = FontSizes.primary,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(bottom = 4.dp),
+                        modifier = Modifier.padding(bottom = Spacing.tightGap),
                     )
                 }
                 Text(
                     text = headerSubtitle,
                     color = colors.textMuted,
-                    fontSize = 12.sp,
+                    fontSize = FontSizes.small,
                     lineHeight = 16.sp,
                     modifier = Modifier.padding(top = 6.dp),
                 )
             }
 
-            WidgetSectionHeader(label = "Date range", topSpace = 6)
+            WidgetSectionHeader(label = strings.layoutDateRange, topSpace = 6)
             SegmentedControl(
                 options = listOf(
-                    SegmentOption(DayMode.ROLLING, "Rolling days"),
-                    SegmentOption(DayMode.THIS_WEEK, "This week"),
+                    SegmentOption(DayMode.ROLLING, strings.layoutOptionRolling),
+                    SegmentOption(DayMode.THIS_WEEK, strings.layoutOptionThisWeek),
                 ),
                 selected = settings.dayMode,
                 onSelect = { mode ->
@@ -131,22 +142,27 @@ fun LayoutScreen(
                     accent = accent,
                 )
                 DayMode.THIS_WEEK -> Text(
-                    text = "Week starts on Monday. The widget shows today plus the rest of this week — at the start of a new week it refills automatically.",
+                    text = strings.layoutThisWeekHint,
                     color = colors.textMuted,
-                    fontSize = 12.sp,
+                    fontSize = FontSizes.small,
                     lineHeight = 16.sp,
-                    modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 4.dp, bottom = 14.dp),
+                    modifier = Modifier.padding(
+                        start = Spacing.cardHorizontalPadding,
+                        end = Spacing.cardHorizontalPadding,
+                        top = Spacing.tightGap,
+                        bottom = 14.dp,
+                    ),
                 )
             }
 
             WidgetDivider()
 
-            WidgetSectionHeader(label = "All-day events")
+            WidgetSectionHeader(label = strings.layoutAllDay)
             SegmentedControl(
                 options = listOf(
-                    SegmentOption(AllDayPosition.TOP, "Top"),
-                    SegmentOption(AllDayPosition.BOTTOM, "Bottom"),
-                    SegmentOption(AllDayPosition.HIDDEN, "Hidden"),
+                    SegmentOption(AllDayPosition.TOP, strings.allDayOptionTop),
+                    SegmentOption(AllDayPosition.BOTTOM, strings.allDayOptionBottom),
+                    SegmentOption(AllDayPosition.HIDDEN, strings.allDayOptionHidden),
                 ),
                 selected = settings.allDayPosition,
                 onSelect = { pos ->

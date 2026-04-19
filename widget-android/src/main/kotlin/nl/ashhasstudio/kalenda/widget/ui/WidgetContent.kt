@@ -2,8 +2,8 @@ package nl.ashhasstudio.kalenda.widget.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalContext
 import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
@@ -22,6 +22,10 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import kotlinx.datetime.TimeZone
 import nl.ashhasstudio.kalenda.domain.DayGroup
+import nl.ashhasstudio.kalenda.widget.R
+
+private const val TODAY_LABEL = "Today"
+private const val COMPACT_EVENTS_LIMIT = 3
 
 @Composable
 fun WidgetContent(
@@ -34,7 +38,7 @@ fun WidgetContent(
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
-            .cornerRadius(16.dp)
+            .cornerRadius(WidgetShapes.cardRadius)
             .background(ColorProvider(theme.background))
     ) {
         if (dayGroups.isEmpty()) {
@@ -49,15 +53,16 @@ fun WidgetContent(
 
 @Composable
 private fun EmptyState(theme: WidgetTheme) {
+    val context = LocalContext.current
     Box(
-        modifier = GlanceModifier.fillMaxSize().padding(16.dp),
+        modifier = GlanceModifier.fillMaxSize().padding(WidgetSpacing.cardBottomPadding),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "No upcoming events",
+            text = context.getString(R.string.widget_no_upcoming),
             style = TextStyle(
                 color = ColorProvider(theme.textMuted),
-                fontSize = 14.sp,
+                fontSize = WidgetFontSizes.body,
                 fontWeight = FontWeight.Normal
             )
         )
@@ -73,26 +78,18 @@ private fun ScrollableContent(
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
         dayGroups.forEach { dayGroup ->
             item {
-                if (dayGroup.label == "Today") {
-                    TodayHeader(dayGroup, theme)
-                } else {
-                    DayHeader(dayGroup, theme)
-                }
+                if (dayGroup.label == TODAY_LABEL) TodayHeader(theme)
+                else DayHeader(dayGroup, theme)
             }
-            if (dayGroup.label == "Today" && dayGroup.events.isEmpty()) {
+            if (dayGroup.label == TODAY_LABEL && dayGroup.events.isEmpty()) {
                 item { EmptyTodayHint(theme) }
             }
             items(dayGroup.events) { event ->
                 EventRowItem(event = event, deviceTimezone = deviceTimezone, theme = theme)
             }
-            if (dayGroup.hasMore) {
-                item {
-                    OverflowItem(moreCount = dayGroup.moreCount)
-                }
-            }
         }
         item {
-            Spacer(modifier = GlanceModifier.height(16.dp))
+            Spacer(modifier = GlanceModifier.height(WidgetSpacing.cardBottomPadding))
         }
     }
 }
@@ -103,47 +100,70 @@ private fun CompactContent(
     deviceTimezone: TimeZone,
     theme: WidgetTheme,
 ) {
-    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 16.dp)) {
+    Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = WidgetSpacing.cardBottomPadding)) {
         val firstGroup = dayGroups.firstOrNull() ?: return@Column
-        if (firstGroup.label == "Today") {
-            TodayHeader(firstGroup, theme)
-        } else {
-            DayHeader(firstGroup, theme)
-        }
+        if (firstGroup.label == TODAY_LABEL) TodayHeader(theme)
+        else DayHeader(firstGroup, theme)
+
         if (firstGroup.events.isEmpty()) {
-            if (firstGroup.label == "Today") EmptyTodayHint(theme)
+            if (firstGroup.label == TODAY_LABEL) EmptyTodayHint(theme)
             val nextGroup = dayGroups.getOrNull(1)
             if (nextGroup != null) {
                 DayHeader(nextGroup, theme)
-                nextGroup.events.take(3).forEach { event ->
+                nextGroup.events.take(COMPACT_EVENTS_LIMIT).forEach { event ->
                     EventRowItem(event = event, deviceTimezone = deviceTimezone, theme = theme)
                 }
-                if (nextGroup.events.size > 3 || nextGroup.hasMore) {
-                    val remaining = (nextGroup.events.size - 3).coerceAtLeast(0) + nextGroup.moreCount
-                    if (remaining > 0) OverflowItem(moreCount = remaining)
-                }
+                val nextRemaining = (nextGroup.events.size - COMPACT_EVENTS_LIMIT).coerceAtLeast(0)
+                if (nextRemaining > 0) OverflowItem(moreCount = nextRemaining, theme = theme)
             }
         } else {
-            firstGroup.events.take(3).forEach { event ->
+            firstGroup.events.take(COMPACT_EVENTS_LIMIT).forEach { event ->
                 EventRowItem(event = event, deviceTimezone = deviceTimezone, theme = theme)
             }
-            if (firstGroup.events.size > 3 || firstGroup.hasMore) {
-                val remaining = (firstGroup.events.size - 3).coerceAtLeast(0) + firstGroup.moreCount
-                if (remaining > 0) OverflowItem(moreCount = remaining)
-            }
+            val remaining = (firstGroup.events.size - COMPACT_EVENTS_LIMIT).coerceAtLeast(0)
+            if (remaining > 0) OverflowItem(moreCount = remaining, theme = theme)
         }
     }
 }
 
 @Composable
+fun WidgetErrorContent(theme: WidgetTheme) {
+    val context = LocalContext.current
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .appWidgetBackground()
+            .cornerRadius(WidgetShapes.cardRadius)
+            .background(ColorProvider(theme.background))
+            .padding(WidgetSpacing.cardBottomPadding),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = context.getString(R.string.widget_error),
+            style = TextStyle(
+                color = ColorProvider(theme.textMuted),
+                fontSize = WidgetFontSizes.subtle,
+                fontWeight = FontWeight.Normal,
+            )
+        )
+    }
+}
+
+@Composable
 private fun EmptyTodayHint(theme: WidgetTheme) {
+    val context = LocalContext.current
     Text(
-        text = "No events today",
+        text = context.getString(R.string.widget_no_events_today),
         style = TextStyle(
             color = ColorProvider(theme.textMuted),
-            fontSize = 12.sp,
+            fontSize = WidgetFontSizes.small,
             fontWeight = FontWeight.Normal,
         ),
-        modifier = GlanceModifier.padding(start = 17.dp, end = 17.dp, top = 2.dp, bottom = 6.dp),
+        modifier = GlanceModifier.padding(
+            start = WidgetSpacing.cardHorizontalPadding,
+            end = WidgetSpacing.cardHorizontalPadding,
+            top = WidgetSpacing.eventPillMarginVertical,
+            bottom = 6.dp,
+        ),
     )
 }

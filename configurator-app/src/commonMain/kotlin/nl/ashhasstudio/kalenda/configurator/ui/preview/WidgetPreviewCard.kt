@@ -68,9 +68,6 @@ fun WidgetPreviewCard(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) {
                 group.events.forEach { event ->
                     PillEventRow(event = event, timezone = deviceTimezone)
                 }
-                if (group.hasMore) {
-                    PillMoreRow(count = group.moreCount)
-                }
             }
         }
     }
@@ -149,30 +146,3 @@ private fun PillEventRow(event: CalendarEvent, timezone: TimeZone) {
     }
 }
 
-@Composable
-private fun PillMoreRow(count: Int) {
-    val pillBg = AccentBlue.copy(alpha = 0.13f)
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 18.dp, vertical = 2.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(4.dp))
-            .background(pillBg)
-            .padding(horizontal = 6.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .height(16.dp)
-                .clip(RoundedCornerShape(1.5.dp))
-                .background(AccentBlue)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            "$count more event${if (count > 1) "s" else ""}...",
-            color = AccentBlue,
-            fontSize = 13.sp,
-        )
-    }
-}

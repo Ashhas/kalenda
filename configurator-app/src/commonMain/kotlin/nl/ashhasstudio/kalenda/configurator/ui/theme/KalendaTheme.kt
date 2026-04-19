@@ -57,8 +57,6 @@ object CalColors {
     val basil = Color(0xFF33B679)
     val sage = Color(0xFF7CB342)
     val graphite = Color(0xFF9E9E9E)
-
-    val all = listOf(peacock, blueberry, lavender, grape, flamingo, tomato, tangerine, banana, basil, sage, graphite)
 }
 
 val LocalKalendaColors = staticCompositionLocalOf { DarkColors }
@@ -80,9 +78,16 @@ private val hueMap = mapOf(
 fun accentColorForHue(hue: String): Color = hueMap[hue] ?: AccentBlue
 
 @Composable
-fun KalendaTheme(isDark: Boolean = true, content: @Composable () -> Unit) {
+fun KalendaTheme(
+    isDark: Boolean = true,
+    strings: Strings,
+    content: @Composable () -> Unit,
+) {
     val colors = if (isDark) DarkColors else LightColors
-    CompositionLocalProvider(LocalKalendaColors provides colors) {
+    CompositionLocalProvider(
+        LocalKalendaColors provides colors,
+        LocalStrings provides strings,
+    ) {
         content()
     }
 }

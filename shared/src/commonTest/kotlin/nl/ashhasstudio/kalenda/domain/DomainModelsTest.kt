@@ -3,7 +3,6 @@ package nl.ashhasstudio.kalenda.domain
 import kotlinx.datetime.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DomainModelsTest {
@@ -29,7 +28,8 @@ class DomainModelsTest {
         assertEquals(7, settings.scrollDays)
         assertEquals(AllDayPosition.TOP, settings.allDayPosition)
         assertTrue(settings.accounts.isEmpty())
-        assertFalse(settings.showAccountColors)
+        assertEquals(DayMode.ROLLING, settings.dayMode)
+        assertEquals(ThemeMode.DARK, settings.themeMode)
     }
 
     @Test

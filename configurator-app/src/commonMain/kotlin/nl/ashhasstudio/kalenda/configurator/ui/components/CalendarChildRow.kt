@@ -26,7 +26,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.ashhasstudio.kalenda.configurator.ui.theme.FontSizes
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
 
 @Composable
 fun CalendarChildRow(
@@ -39,6 +41,7 @@ fun CalendarChildRow(
     parentEnabled: Boolean,
 ) {
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
@@ -64,16 +67,16 @@ fun CalendarChildRow(
             Text(
                 text = name,
                 color = if (enabled) colors.textPrimary else colors.textMuted,
-                fontSize = 13.sp,
+                fontSize = FontSizes.subtle,
                 lineHeight = 16.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             if (enabled && !showAllDay) {
                 Text(
-                    text = "All-day events hidden",
+                    text = strings.calendarsAllDayHidden,
                     color = colors.textSubtle,
-                    fontSize = 11.sp,
+                    fontSize = FontSizes.tiny,
                     lineHeight = 14.sp,
                     maxLines = 1,
                     modifier = Modifier.padding(top = 1.dp)
@@ -115,7 +118,7 @@ private fun SunIcon(color: Color, strikethrough: Boolean) {
         val rayAngles = if (strikethrough) listOf(0f, 90f, 180f, 270f)
         else listOf(0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f)
         rayAngles.forEach { angle ->
-            val rad = Math.toRadians(angle.toDouble())
+            val rad = (angle.toDouble() * kotlin.math.PI) / 180.0
             val cos = kotlin.math.cos(rad).toFloat()
             val sin = kotlin.math.sin(rad).toFloat()
             drawLine(

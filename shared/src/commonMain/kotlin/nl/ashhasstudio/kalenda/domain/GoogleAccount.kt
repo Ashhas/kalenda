@@ -9,4 +9,5 @@ data class GoogleAccount(
     val accessToken: String,
     val refreshToken: String,
     val calendars: List<GoogleCalendar> = emptyList(),
+    val needsReauth: Boolean = false,
 )

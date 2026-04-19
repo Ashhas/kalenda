@@ -25,7 +25,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.ashhasstudio.kalenda.configurator.ui.theme.FontSizes
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Shapes
+
+private const val PRESSED_SCALE = 0.97f
+private const val PRESSED_ALPHA = 0.85f
+private const val PRESS_ANIM_MS = 80
+private val CtaDarkTextOnAccent = Color(0xFF0B1220)
 
 @Composable
 fun ApplyCTA(
@@ -33,15 +41,16 @@ fun ApplyCTA(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val labelColor = if (LocalKalendaColors.current.isDark) Color(0xFF0B1220) else Color.White
+    val labelColor = if (LocalKalendaColors.current.isDark) CtaDarkTextOnAccent else Color.White
+    val strings = LocalStrings.current
     var pressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
-        targetValue = if (pressed) 0.97f else 1f,
-        animationSpec = tween(80)
+        targetValue = if (pressed) PRESSED_SCALE else 1f,
+        animationSpec = tween(PRESS_ANIM_MS)
     )
     val alpha by animateFloatAsState(
-        targetValue = if (pressed) 0.85f else 1f,
-        animationSpec = tween(80)
+        targetValue = if (pressed) PRESSED_ALPHA else 1f,
+        animationSpec = tween(PRESS_ANIM_MS)
     )
 
     Row(
@@ -49,7 +58,7 @@ fun ApplyCTA(
             .fillMaxWidth()
             .scale(scale)
             .graphicsLayer { this.alpha = alpha }
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(Shapes.buttonRadius))
             .background(accent)
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -69,16 +78,16 @@ fun ApplyCTA(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Apply to widget",
+            text = strings.applyToWidget,
             color = labelColor,
-            fontSize = 15.sp,
+            fontSize = FontSizes.primary,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.1.sp,
         )
         Text(
             text = "  \u2192",
             color = labelColor,
-            fontSize = 15.sp,
+            fontSize = FontSizes.primary,
             fontWeight = FontWeight.SemiBold,
         )
     }

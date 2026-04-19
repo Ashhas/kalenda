@@ -17,7 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.ashhasstudio.kalenda.configurator.ui.theme.FontSizes
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+
+private val WordmarkSize = 26.sp
+private val AccentDotSize = 7.dp
 
 @Composable
 fun HomeHero(
@@ -26,21 +31,22 @@ fun HomeHero(
     accentColor: Color,
 ) {
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     Row(
         modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 16.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Kalenda",
+            text = strings.appName,
             color = colors.textPrimary,
-            fontSize = 26.sp,
+            fontSize = WordmarkSize,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = (-0.2).sp,
         )
         Spacer(modifier = Modifier.weight(1f))
         Box(
             modifier = Modifier
-                .size(7.dp)
+                .size(AccentDotSize)
                 .clip(CircleShape)
                 .background(accentColor)
         )
@@ -48,7 +54,7 @@ fun HomeHero(
         Text(
             text = "$dayOfWeek · $dateLabel".uppercase(),
             color = colors.textMuted,
-            fontSize = 12.sp,
+            fontSize = FontSizes.small,
             fontWeight = FontWeight.Medium,
             letterSpacing = 0.4.sp,
         )

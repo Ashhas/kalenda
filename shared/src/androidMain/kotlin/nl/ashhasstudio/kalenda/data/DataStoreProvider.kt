@@ -5,15 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "kalenda_prefs")
+// The `preferencesDataStore` delegate already ensures a single DataStore per Context per
+// filename, so we don't need an extra `object DataStoreProvider` wrapper with DCL.
+internal val Context.kalendaDataStore: DataStore<Preferences> by preferencesDataStore(name = "kalenda_prefs")
 
+// Kept as a thin wrapper for the existing call sites; resolves to the same singleton.
 object DataStoreProvider {
-    @Volatile
-    private var instance: DataStore<Preferences>? = null
-
-    fun get(context: Context): DataStore<Preferences> {
-        return instance ?: synchronized(this) {
-            instance ?: context.applicationContext.dataStore.also { instance = it }
-        }
-    }
+    fun get(context: Context): DataStore<Preferences> = context.applicationContext.kalendaDataStore
 }

@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import nl.ashhasstudio.kalenda.configurator.ui.components.ColorStrip
 import nl.ashhasstudio.kalenda.configurator.ui.components.SubBar
@@ -21,6 +20,8 @@ import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetDivider
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetSectionHeader
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetToggleRow
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalStrings
+import nl.ashhasstudio.kalenda.configurator.ui.theme.Spacing
 import nl.ashhasstudio.kalenda.configurator.ui.theme.accentColorForHue
 import nl.ashhasstudio.kalenda.data.SettingsRepository
 import nl.ashhasstudio.kalenda.domain.ThemeMode
@@ -34,6 +35,7 @@ fun AppearanceScreen(
     val settings by settingsRepository.observeSettings().collectAsState(initial = WidgetSettings())
     val scope = rememberCoroutineScope()
     val colors = LocalKalendaColors.current
+    val strings = LocalStrings.current
     val accent = accentColorForHue(settings.accentHue)
     val isLight = settings.themeMode == ThemeMode.LIGHT
 
@@ -43,15 +45,15 @@ fun AppearanceScreen(
             .background(colors.background)
             .navigationBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(12.dp)
+            .padding(Spacing.screenPadding)
     ) {
-        SubBar(title = "Appearance", onBack = onBack)
+        SubBar(title = strings.appearanceTitle, onBack = onBack)
 
         WidgetCard {
             WidgetToggleRow(
                 barColor = accent,
-                title = "Light mode",
-                subtitle = if (isLight) "Bright theme for both config & widget" else "Dark theme (default)",
+                title = strings.appearanceLightMode,
+                subtitle = if (isLight) strings.appearanceLightModeOn else strings.appearanceLightModeOff,
                 checked = isLight,
                 onCheckedChange = { v ->
                     scope.launch {
@@ -64,7 +66,7 @@ fun AppearanceScreen(
 
             WidgetDivider()
 
-            WidgetSectionHeader(label = "Accent color")
+            WidgetSectionHeader(label = strings.appearanceAccentColor)
             ColorStrip(
                 selected = settings.accentHue,
                 onSelect = { hue ->
