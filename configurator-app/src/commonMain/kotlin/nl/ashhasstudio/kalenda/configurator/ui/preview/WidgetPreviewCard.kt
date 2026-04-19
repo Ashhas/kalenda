@@ -79,6 +79,7 @@ fun WidgetPreviewCard(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) {
 @Composable
 private fun PreviewDayHeader(isToday: Boolean) {
     if (!isToday) return
+    val colors = LocalKalendaColors.current
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     val dayNumber = today.dayOfMonth.toString()
     val dayName = today.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
@@ -88,7 +89,7 @@ private fun PreviewDayHeader(isToday: Boolean) {
     ) {
         Text(
             dayNumber,
-            color = Color.White,
+            color = colors.textPrimary,
             fontSize = 34.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 36.sp,
@@ -107,6 +108,7 @@ private fun PreviewDayHeader(isToday: Boolean) {
 
 @Composable
 private fun PillEventRow(event: CalendarEvent, timezone: TimeZone) {
+    val colors = LocalKalendaColors.current
     val eventColor = Color(event.calendarColor.toInt())
     val pillBg = eventColor.copy(alpha = 0.13f)
     Row(
@@ -128,7 +130,7 @@ private fun PillEventRow(event: CalendarEvent, timezone: TimeZone) {
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             event.title,
-            color = Color.White,
+            color = colors.textPrimary,
             fontSize = 14.sp,
             modifier = Modifier.weight(1f),
             maxLines = 1
@@ -141,7 +143,7 @@ private fun PillEventRow(event: CalendarEvent, timezone: TimeZone) {
         }
         Text(
             timeLabel,
-            color = Color.White,
+            color = colors.textPrimary,
             fontSize = 12.sp,
         )
     }

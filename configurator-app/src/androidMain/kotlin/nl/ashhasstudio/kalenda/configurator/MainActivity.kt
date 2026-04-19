@@ -7,8 +7,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import nl.ashhasstudio.kalenda.configurator.ui.theme.KalendaTheme
+import nl.ashhasstudio.kalenda.domain.ThemeMode
+import nl.ashhasstudio.kalenda.domain.WidgetSettings
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import nl.ashhasstudio.kalenda.configurator.auth.TokenExchangeService
@@ -32,10 +36,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
 
         settingsRepo = AndroidSettingsRepository(this)
         calendarRepo = AndroidCalendarRepository(this)
@@ -46,7 +46,17 @@ class MainActivity : ComponentActivity() {
         handleOAuthRedirect(intent)
 
         setContent {
-            KalendaTheme {
+            val settings by settingsRepo.observeSettings().collectAsState(initial = WidgetSettings())
+            val isDark = settings.themeMode == ThemeMode.DARK
+            androidx.compose.runtime.LaunchedEffect(isDark) {
+                WindowCompat.getInsetsController(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = !isDark
+                    isAppearanceLightNavigationBars = !isDark
+                }
+                val bgColor = if (isDark) 0xFF121214.toInt() else 0xFFF2F2F7.toInt()
+                window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bgColor))
+            }
+            KalendaTheme(isDark = isDark) {
                 AppNavigation(
                     settingsRepository = settingsRepo,
                     calendarRepository = calendarRepo,

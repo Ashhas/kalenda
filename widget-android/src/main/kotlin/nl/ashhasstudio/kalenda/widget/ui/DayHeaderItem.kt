@@ -22,11 +22,9 @@ import kotlinx.datetime.toLocalDateTime
 import nl.ashhasstudio.kalenda.domain.DayGroup
 
 private val AccentBlue = ColorProvider(Color(0xFF4FC3F7))
-private val MutedGrey = ColorProvider(Color(0xFF9E9E9E))
-private val White = ColorProvider(Color.White)
 
 @Composable
-fun TodayHeader(dayGroup: DayGroup) {
+fun TodayHeader(dayGroup: DayGroup, theme: WidgetTheme) {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     val dayNumber = today.dayOfMonth.toString()
     val dayName = today.dayOfWeek.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
@@ -39,7 +37,7 @@ fun TodayHeader(dayGroup: DayGroup) {
         Text(
             text = dayNumber,
             style = TextStyle(
-                color = White,
+                color = ColorProvider(theme.textPrimary),
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -60,7 +58,7 @@ fun TodayHeader(dayGroup: DayGroup) {
 }
 
 @Composable
-fun DayHeader(dayGroup: DayGroup) {
+fun DayHeader(dayGroup: DayGroup, theme: WidgetTheme) {
     Column(
         modifier = GlanceModifier
             .fillMaxWidth()
@@ -69,7 +67,7 @@ fun DayHeader(dayGroup: DayGroup) {
         Text(
             text = dayGroup.label,
             style = TextStyle(
-                color = MutedGrey,
+                color = ColorProvider(theme.textSubtle),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium
             )

@@ -10,4 +10,5 @@ data class WidgetSettings(
     val accounts: List<GoogleAccount> = emptyList(),
     val showAccountColors: Boolean = false,
     val accentHue: String = "peacock",
+    val themeMode: ThemeMode = ThemeMode.DARK,
 )

@@ -25,6 +25,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
 
 @Composable
 fun ApplyCTA(
@@ -32,6 +33,7 @@ fun ApplyCTA(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val labelColor = if (LocalKalendaColors.current.isDark) Color(0xFF0B1220) else Color.White
     var pressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
         targetValue = if (pressed) 0.97f else 1f,
@@ -68,14 +70,14 @@ fun ApplyCTA(
     ) {
         Text(
             text = "Apply to widget",
-            color = Color(0xFF0B1220),
+            color = labelColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             letterSpacing = 0.1.sp,
         )
         Text(
             text = "  \u2192",
-            color = Color(0xFF0B1220),
+            color = labelColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
         )

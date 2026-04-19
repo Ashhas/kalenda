@@ -17,9 +17,13 @@ import kotlinx.coroutines.launch
 import nl.ashhasstudio.kalenda.configurator.ui.components.ColorStrip
 import nl.ashhasstudio.kalenda.configurator.ui.components.SubBar
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetCard
+import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetDivider
 import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetSectionHeader
+import nl.ashhasstudio.kalenda.configurator.ui.components.WidgetToggleRow
 import nl.ashhasstudio.kalenda.configurator.ui.theme.LocalKalendaColors
+import nl.ashhasstudio.kalenda.configurator.ui.theme.accentColorForHue
 import nl.ashhasstudio.kalenda.data.SettingsRepository
+import nl.ashhasstudio.kalenda.domain.ThemeMode
 import nl.ashhasstudio.kalenda.domain.WidgetSettings
 
 @Composable
@@ -30,6 +34,8 @@ fun AppearanceScreen(
     val settings by settingsRepository.observeSettings().collectAsState(initial = WidgetSettings())
     val scope = rememberCoroutineScope()
     val colors = LocalKalendaColors.current
+    val accent = accentColorForHue(settings.accentHue)
+    val isLight = settings.themeMode == ThemeMode.LIGHT
 
     Column(
         modifier = Modifier
@@ -42,6 +48,22 @@ fun AppearanceScreen(
         SubBar(title = "Appearance", onBack = onBack)
 
         WidgetCard {
+            WidgetToggleRow(
+                barColor = accent,
+                title = "Light mode",
+                subtitle = if (isLight) "Bright theme for both config & widget" else "Dark theme (default)",
+                checked = isLight,
+                onCheckedChange = { v ->
+                    scope.launch {
+                        settingsRepository.updateSettings(
+                            settings.copy(themeMode = if (v) ThemeMode.LIGHT else ThemeMode.DARK)
+                        )
+                    }
+                },
+            )
+
+            WidgetDivider()
+
             WidgetSectionHeader(label = "Accent color")
             ColorStrip(
                 selected = settings.accentHue,

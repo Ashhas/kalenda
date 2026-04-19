@@ -1,7 +1,6 @@
 package nl.ashhasstudio.kalenda.widget.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -24,34 +23,32 @@ import androidx.glance.unit.ColorProvider
 import kotlinx.datetime.TimeZone
 import nl.ashhasstudio.kalenda.domain.DayGroup
 
-private val BackgroundColor = ColorProvider(Color(0xFF1C1C1E))
-private val MutedWhite = ColorProvider(Color(0x99FFFFFF))
-
 @Composable
 fun WidgetContent(
     dayGroups: List<DayGroup>,
     deviceTimezone: TimeZone,
-    isScrollable: Boolean
+    isScrollable: Boolean,
+    theme: WidgetTheme,
 ) {
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
             .cornerRadius(16.dp)
-            .background(BackgroundColor)
+            .background(ColorProvider(theme.background))
     ) {
         if (dayGroups.isEmpty()) {
-            EmptyState()
+            EmptyState(theme)
         } else if (isScrollable) {
-            ScrollableContent(dayGroups = dayGroups, deviceTimezone = deviceTimezone)
+            ScrollableContent(dayGroups, deviceTimezone, theme)
         } else {
-            CompactContent(dayGroups = dayGroups, deviceTimezone = deviceTimezone)
+            CompactContent(dayGroups, deviceTimezone, theme)
         }
     }
 }
 
 @Composable
-private fun EmptyState() {
+private fun EmptyState(theme: WidgetTheme) {
     Box(
         modifier = GlanceModifier.fillMaxSize().padding(16.dp),
         contentAlignment = Alignment.Center
@@ -59,7 +56,7 @@ private fun EmptyState() {
         Text(
             text = "No upcoming events",
             style = TextStyle(
-                color = MutedWhite,
+                color = ColorProvider(theme.textMuted),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal
             )
@@ -68,21 +65,25 @@ private fun EmptyState() {
 }
 
 @Composable
-private fun ScrollableContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) {
+private fun ScrollableContent(
+    dayGroups: List<DayGroup>,
+    deviceTimezone: TimeZone,
+    theme: WidgetTheme,
+) {
     LazyColumn(modifier = GlanceModifier.fillMaxSize()) {
         dayGroups.forEach { dayGroup ->
             item {
                 if (dayGroup.label == "Today") {
-                    TodayHeader(dayGroup)
+                    TodayHeader(dayGroup, theme)
                 } else {
-                    DayHeader(dayGroup)
+                    DayHeader(dayGroup, theme)
                 }
             }
             if (dayGroup.label == "Today" && dayGroup.events.isEmpty()) {
-                item { EmptyTodayHint() }
+                item { EmptyTodayHint(theme) }
             }
             items(dayGroup.events) { event ->
-                EventRowItem(event = event, deviceTimezone = deviceTimezone)
+                EventRowItem(event = event, deviceTimezone = deviceTimezone, theme = theme)
             }
             if (dayGroup.hasMore) {
                 item {
@@ -97,21 +98,25 @@ private fun ScrollableContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZon
 }
 
 @Composable
-private fun CompactContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) {
+private fun CompactContent(
+    dayGroups: List<DayGroup>,
+    deviceTimezone: TimeZone,
+    theme: WidgetTheme,
+) {
     Column(modifier = GlanceModifier.fillMaxSize().padding(bottom = 16.dp)) {
         val firstGroup = dayGroups.firstOrNull() ?: return@Column
         if (firstGroup.label == "Today") {
-            TodayHeader(firstGroup)
+            TodayHeader(firstGroup, theme)
         } else {
-            DayHeader(firstGroup)
+            DayHeader(firstGroup, theme)
         }
         if (firstGroup.events.isEmpty()) {
-            if (firstGroup.label == "Today") EmptyTodayHint()
+            if (firstGroup.label == "Today") EmptyTodayHint(theme)
             val nextGroup = dayGroups.getOrNull(1)
             if (nextGroup != null) {
-                DayHeader(nextGroup)
+                DayHeader(nextGroup, theme)
                 nextGroup.events.take(3).forEach { event ->
-                    EventRowItem(event = event, deviceTimezone = deviceTimezone)
+                    EventRowItem(event = event, deviceTimezone = deviceTimezone, theme = theme)
                 }
                 if (nextGroup.events.size > 3 || nextGroup.hasMore) {
                     val remaining = (nextGroup.events.size - 3).coerceAtLeast(0) + nextGroup.moreCount
@@ -120,7 +125,7 @@ private fun CompactContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) 
             }
         } else {
             firstGroup.events.take(3).forEach { event ->
-                EventRowItem(event = event, deviceTimezone = deviceTimezone)
+                EventRowItem(event = event, deviceTimezone = deviceTimezone, theme = theme)
             }
             if (firstGroup.events.size > 3 || firstGroup.hasMore) {
                 val remaining = (firstGroup.events.size - 3).coerceAtLeast(0) + firstGroup.moreCount
@@ -131,11 +136,11 @@ private fun CompactContent(dayGroups: List<DayGroup>, deviceTimezone: TimeZone) 
 }
 
 @Composable
-private fun EmptyTodayHint() {
+private fun EmptyTodayHint(theme: WidgetTheme) {
     Text(
         text = "No events today",
         style = TextStyle(
-            color = MutedWhite,
+            color = ColorProvider(theme.textMuted),
             fontSize = 12.sp,
             fontWeight = FontWeight.Normal,
         ),

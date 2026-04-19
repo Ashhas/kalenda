@@ -17,6 +17,7 @@ import nl.ashhasstudio.kalenda.data.AndroidSettingsRepository
 import nl.ashhasstudio.kalenda.domain.DayGroup
 import nl.ashhasstudio.kalenda.usecase.GroupEventsByDayUseCase
 import nl.ashhasstudio.kalenda.widget.ui.WidgetContent
+import nl.ashhasstudio.kalenda.widget.ui.themeFor
 
 class KalendaWidget : GlanceAppWidget() {
     override val sizeMode = SizeMode.Exact
@@ -36,6 +37,7 @@ class KalendaWidget : GlanceAppWidget() {
             referenceDate = Clock.System.now(),
             deviceTimezone = deviceTz
         )
+        val widgetTheme = themeFor(settings.themeMode)
 
         provideContent {
             currentState<Preferences>()
@@ -45,7 +47,8 @@ class KalendaWidget : GlanceAppWidget() {
             WidgetContent(
                 dayGroups = dayGroups,
                 deviceTimezone = deviceTz,
-                isScrollable = isScrollable
+                isScrollable = isScrollable,
+                theme = widgetTheme,
             )
         }
     }

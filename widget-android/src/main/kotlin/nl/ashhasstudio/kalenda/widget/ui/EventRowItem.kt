@@ -23,11 +23,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import nl.ashhasstudio.kalenda.domain.CalendarEvent
 
-private val EventWhite = ColorProvider(Color.White)
 private val OverflowBlue = ColorProvider(Color(0xFF4FC3F7))
 
 @Composable
-fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone) {
+fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone, theme: WidgetTheme) {
     val timeText = if (event.isAllDay) {
         "All day"
     } else {
@@ -64,7 +63,7 @@ fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone) {
                 Text(
                     text = event.title,
                     style = TextStyle(
-                        color = EventWhite,
+                        color = ColorProvider(theme.textPrimary),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
                     ),
@@ -77,7 +76,7 @@ fun EventRowItem(event: CalendarEvent, deviceTimezone: TimeZone) {
             Text(
                 text = timeText,
                 style = TextStyle(
-                    color = EventWhite,
+                    color = ColorProvider(theme.textPrimary),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal
                 )
