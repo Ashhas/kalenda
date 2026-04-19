@@ -2,6 +2,7 @@ package nl.ashhasstudio.kalenda.usecase
 
 import nl.ashhasstudio.kalenda.domain.CalendarEvent
 import nl.ashhasstudio.kalenda.domain.DayGroup
+import nl.ashhasstudio.kalenda.domain.DayMode
 import nl.ashhasstudio.kalenda.domain.WidgetSettings
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -22,7 +23,11 @@ class GroupEventsByDayUseCase {
     ): List<DayGroup> {
         val today = referenceDate.toLocalDateTime(deviceTimezone).date
         val tomorrow = today.plus(1, DateTimeUnit.DAY)
-        val endDate = today.plus(settings.scrollDays, DateTimeUnit.DAY)
+        val effectiveDays = when (settings.dayMode) {
+            DayMode.THIS_WEEK -> 8 - (today.dayOfWeek.ordinal + 1)
+            DayMode.ROLLING -> settings.scrollDays
+        }
+        val endDate = today.plus(effectiveDays, DateTimeUnit.DAY)
 
         val allDayHiddenCalendarIds = settings.accounts
             .flatMap { it.calendars }

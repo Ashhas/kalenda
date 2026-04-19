@@ -64,7 +64,11 @@ fun HomeScreen(
 
     val accountCount = settings.accounts.size
     val activeCalendarCount = settings.accounts.sumOf { acc -> acc.calendars.count { it.enabled } }
-    val layoutSummary = "${settings.scrollDays} days · ${settings.allDayPosition.name.lowercase()}"
+    val dayRangeLabel = when (settings.dayMode) {
+        nl.ashhasstudio.kalenda.domain.DayMode.THIS_WEEK -> "Rest of this week"
+        nl.ashhasstudio.kalenda.domain.DayMode.ROLLING -> "${settings.scrollDays} days"
+    }
+    val layoutSummary = "$dayRangeLabel · ${settings.allDayPosition.name.lowercase()}"
     val appearanceSummary = "Accent · ${settings.accentHue}"
     val calendarsSummary = "$accountCount account${if (accountCount != 1) "s" else ""} · " +
         "$activeCalendarCount calendar${if (activeCalendarCount != 1) "s" else ""}"
